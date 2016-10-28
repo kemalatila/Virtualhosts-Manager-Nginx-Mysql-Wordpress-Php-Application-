@@ -1,0 +1,36 @@
+server {
+
+        listen  80;
+	access_log off;     
+	error_log /var/log/nginx/%host.error.log;
+        root /var/www/%host/html;
+        index index.php index.html index.htm;
+
+     	server_name www.%host %host;
+
+        location / {
+                try_files $uri $uri/ /index.php?q=$uri&$args;
+        }
+
+        error_page 404 /404.html;
+
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+              root /usr/share/nginx/www;
+        }
+
+	location ~*  \.(jpg|jpeg|png|gif|ico|css|js|svg|woff)$ {
+        expires 365d;
+    	}
+
+        # pass the PHP scripts to FastCGI server listening on the php-fpm socket
+        location ~ \.php$ {
+		try_files  $uri =404;
+		include 	/etc/nginx/fastcgi_params;
+		fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+		fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;	
+                fastcgi_index index.php;        
+                include fastcgi_params;                
+        }
+}
+
